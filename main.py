@@ -4,8 +4,6 @@ XSS Scanner API - Main Application File
 This file contains the FastAPI application for scanning code snippets for XSS vulnerabilities.
 It's designed to be easy to understand for junior developers with clear comments and simple structure.
 
-Author: BLACKBOXAI
-Version: 1.0.0
 """
 
 # Import required libraries
