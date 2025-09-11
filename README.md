@@ -37,7 +37,7 @@ A fast, automated API to scan HTML and JavaScript code snippets for potential Cr
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/xss-scanner-api.git
+git clone https://github.com/DevToolsConglomerate/xss-scanner
 cd xss-scanner-api
 ```
 
