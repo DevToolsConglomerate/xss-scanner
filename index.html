@@ -39,7 +39,7 @@
                 <div class="flex items-center">
                     <a href="#" class="text-xl font-bold text-gray-800">XSS Scanner API</a>
                 </div>
-                <div class="hidden md:flex items-center space-x-8">
+                <div class="hidden md:flex items-center space-x-8" id="nav-links">
                     <a href="#hero" class="text-gray-600 hover:text-blue-600 transition duration-300">Home</a>
                     <a href="#features" class="text-gray-600 hover:text-blue-600 transition duration-300">Features</a>
                     <a href="#api-docs" class="text-gray-600 hover:text-blue-600 transition duration-300">API Docs</a>
@@ -77,6 +77,9 @@
                 </a>
                 <a href="#api-docs" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300">
                     View API Docs
+                </a>
+                <a href="signup.html" id="signup-btn" class="bg-yellow-400 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition duration-300" style="display: none;">
+                    Sign Up
                 </a>
             </div>
         </div>
@@ -270,11 +273,11 @@
                     <div class="space-y-4">
                         <div class="flex items-center">
                             <i class="fas fa-envelope text-blue-400 mr-3"></i>
-                            <span>support@xss-scanner.com</span>
+                            <span>support@devtoolsconglomerate.com</span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-phone text-blue-400 mr-3"></i>
-                            <span>+1 (555) 123-4567</span>
+                            <span>+233 (059) 615-4533</span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-map-marker-alt text-blue-400 mr-3"></i>
@@ -343,7 +346,7 @@
         const demoResult = document.getElementById('demo-result');
         const resultText = document.getElementById('result-text');
 
-        scanBtn.addEventListener('click', () => {
+        scanBtn.addEventListener('click', async () => {
             const code = demoCode.value.trim();
             if (code === '') {
                 resultText.textContent = 'Please enter some code to scan.';
@@ -351,17 +354,50 @@
                 return;
             }
 
-            // Simulate scanning (in a real implementation, this would call the API)
+            const apiKey = localStorage.getItem('xssApiKey');
+            if (!apiKey) {
+                resultText.innerHTML = 'Please <a href="signup.html" class="text-blue-600 underline">sign up</a> to get an API key and use the scanner.';
+                demoResult.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading state
             demoResult.classList.remove('hidden');
             resultText.textContent = 'Scanning...';
+            scanBtn.disabled = true;
+            scanBtn.textContent = 'Scanning...';
 
-            setTimeout(() => {
-                if (code.includes('<script>') || code.includes('alert(')) {
-                    resultText.textContent = 'Potential XSS vulnerability detected! Severity: High';
+            try {
+                const response = await fetch('/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    },
+                    body: JSON.stringify({ code })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    if (result.vulnerabilities_found > 0) {
+                        resultText.innerHTML = `<div class="text-red-600 mb-2">⚠️ Found ${result.vulnerabilities_found} potential XSS vulnerabilities:</div>`;
+                        result.vulnerabilities.forEach(vuln => {
+                            resultText.innerHTML += `<div class="text-sm text-gray-700 mb-1">Line ${vuln.line}: ${vuln.vulnerability_type} - ${vuln.description}</div>`;
+                        });
+                    } else {
+                        resultText.innerHTML = '<div class="text-green-600">✅ No XSS vulnerabilities detected in the provided code.</div>';
+                    }
                 } else {
-                    resultText.textContent = 'No XSS vulnerabilities found in the provided code.';
+                    resultText.textContent = `Error: ${result.detail || 'Scan failed'}`;
                 }
-            }, 2000);
+            } catch (error) {
+                resultText.textContent = 'Error: Unable to connect to the API. Please try again later.';
+                console.error('Scan error:', error);
+            } finally {
+                scanBtn.disabled = false;
+                scanBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Scan for XSS';
+            }
         });
 
         // Add fade-in animation on scroll
@@ -381,6 +417,20 @@
         document.querySelectorAll('section').forEach(section => {
             observer.observe(section);
         });
+
+        // Check for API key and show/hide signup button and nav link
+        const apiKey = localStorage.getItem('xssApiKey');
+        const signupBtn = document.getElementById('signup-btn');
+        const navLinks = document.getElementById('nav-links');
+        if (!apiKey) {
+            signupBtn.style.display = 'inline-block';
+            signupBtn.href = 'signup.html';
+            const signupNavLink = document.createElement('a');
+            signupNavLink.href = 'signup.html';
+            signupNavLink.className = 'text-gray-600 hover:text-blue-600 transition duration-300';
+            signupNavLink.textContent = 'Sign Up';
+            navLinks.appendChild(signupNavLink);
+        }
     </script>
 </body>
 </html>

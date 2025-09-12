@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication - XSS Scanner API</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .auth-card {
+            background: rgba(45, 55, 72, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .auth-card:hover {
+            transform: translateY(-5px) rotateX(2deg);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(26, 32, 44, 0.8);
+            color: #a0aec0;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            background: #3182ce;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(26, 32, 44, 0.8);
+            color: #e2e8f0;
+        }
+        .input-group input:focus {
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
+            transform: translateY(-1px);
+        }
+        .input-group input::placeholder {
+            color: #a0aec0;
+        }
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #63b3ed;
+            transition: color 0.3s ease;
+        }
+        .input-group input:focus + i {
+            color: #4299e1;
+        }
+        .btn-auth {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(49, 130, 206, 0.3);
+        }
+        .btn-auth:active {
+            transform: translateY(0);
+        }
+        .btn-signup {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        }
+        .btn-signup:hover {
+            box-shadow: 0 10px 20px rgba(56, 161, 105, 0.3);
+        }
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(99, 179, 237, 0.1);
+            animation: float 8s ease-in-out infinite;
+        }
+        .shape:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 15%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+        .shape:nth-child(2) {
+            width: 40px;
+            height: 40px;
+            top: 25%;
+            right: 15%;
+            animation-delay: 3s;
+        }
+        .shape:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 15%;
+            left: 25%;
+            animation-delay: 6s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e2e8f0;
+        }
+        .logo p {
+            color: #a0aec0;
+            font-size: 1.1rem;
+        }
+        .api-key-section {
+            display: none;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(56, 161, 105, 0.1);
+            border: 1px solid #38a169;
+            border-radius: 8px;
+        }
+        .api-key-section h3 {
+            color: #68d391;
+            margin-bottom: 0.5rem;
+        }
+        .api-key {
+            background: rgba(26, 32, 44, 0.8);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #e2e8f0;
+            word-break: break-all;
+        }
+        .copy-btn {
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #38a169;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .copy-btn:hover {
+            background: #2f855a;
+        }
+        .switch-tab {
+            text-align: center;
+            margin-top: 1rem;
+            color: #a0aec0;
+        }
+        .switch-tab a {
+            color: #63b3ed;
+            text-decoration: none;
+        }
+        .switch-tab a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 640px) {
+            .auth-card {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    <div class="auth-card p-8">
+        <div class="logo">
+            <h1>XSS Scanner</h1>
+            <p id="subtitle">Secure Your Code</p>
+        </div>
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="showTab('login')">Login</button>
+            <button class="tab-btn" onclick="showTab('signup')">Sign Up</button>
+        </div>
+        <div id="login-tab" class="tab-content active">
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="email" id="login-email" placeholder="Email Address" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="login-api-key" placeholder="API Key" required>
+                    <i class="fas fa-key"></i>
+                </div>
+                <button type="submit" class="btn-auth">Login</button>
+            </form>
+            <div class="switch-tab">
+                Don't have an account? <a href="#" onclick="showTab('signup')">Sign up</a>
+            </div>
+        </div>
+        <div id="signup-tab" class="tab-content">
+            <form id="signup-form">
+                <div class="input-group">
+                    <input type="text" id="name" placeholder="Full Name" required>
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email Address" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <button type="submit" class="btn-auth btn-signup">Sign Up</button>
+            </form>
+            <div id="api-key-section" class="api-key-section">
+                <h3>🎉 Welcome! Your API Key:</h3>
+                <div class="api-key" id="generated-api-key">xss-api-key-1234567890abcdef</div>
+                <button class="copy-btn" onclick="copyApiKey()">Copy API Key</button>
+                <p class="text-sm text-gray-300 mt-2">Keep this key safe! Use it to login and access the API.</p>
+                <button class="copy-btn" onclick="proceedToLogin()" style="margin-top: 1rem;">Proceed to Login</button>
+            </div>
+            <div class="switch-tab">
+                Already have an API key? <a href="#" onclick="showTab('login')">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            document.getElementById('subtitle').textContent = tab === 'login' ? 'Secure Your Code' : 'Create Your Account';
+            if (tab === 'login') {
+                document.getElementById('api-key-section').style.display = 'none';
+            }
+        }
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const apiKey = document.getElementById('login-api-key').value.trim();
+
+            const storedEmail = localStorage.getItem('userEmail');
+            const storedPassword = localStorage.getItem('userPassword');
+            const storedApiKey = localStorage.getItem('xssApiKey');
+
+            if (email === storedEmail && password === storedPassword && apiKey === storedApiKey) {
+                localStorage.setItem('loggedIn', 'true');
+                alert('Login successful! Redirecting to dashboard...');
+                window.location.href = 'index.html';
+            } else {
+                alert('Invalid credentials. Please check your email, password, and API key.');
+            }
+        });
+
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            if (name && email && password) {
+                // Generate a mock API key
+                const apiKey = 'xss-' + Math.random().toString(36).substr(2, 16);
+                document.getElementById('generated-api-key').textContent = apiKey;
+                // Store in localStorage
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userPassword', password);
+                localStorage.setItem('xssApiKey', apiKey);
+                document.getElementById('signup-form').style.display = 'none';
+                document.getElementById('api-key-section').style.display = 'block';
+                document.querySelector('.switch-tab').style.display = 'none';
+            } else {
+                alert('Please fill in all fields.');
+            }
+        });
+
+        function copyApiKey() {
+            const apiKey = document.getElementById('generated-api-key').textContent;
+            navigator.clipboard.writeText(apiKey).then(function() {
+                alert('API Key copied to clipboard!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function proceedToLogin() {
+            const apiKey = document.getElementById('generated-api-key').textContent;
+            localStorage.setItem('tempApiKey', apiKey); // Store temporarily for login page
+            window.location.href = 'login.html';
+        }
+
+        // Add some interactive effects
+        document.querySelectorAll('.input-group input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

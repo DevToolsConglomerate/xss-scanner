@@ -54,7 +54,7 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory:
 
 ```env
-# MongoDB Configuration
+# MongoDB Configuration (optional - app runs in demo mode without it)
 MONGODB_URI=mongodb://localhost:27017/your_database
 
 # Stripe Configuration (for payments)
@@ -64,7 +64,11 @@ STRIPE_WEBHOOK_SECRET=your_webhook_secret
 # API Configuration
 API_HOST=0.0.0.0
 API_PORT=8000
+SECRET_KEY=your-secret-key-here
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
 ```
+
+**Note**: The application runs in demo mode without MongoDB, accepting any API key for testing purposes.
 
 ### Database Setup
 
@@ -82,18 +86,38 @@ API_PORT=8000
 
 ## 🚀 Running Locally
 
-### Development Server
+### One-Command Setup
+
+The application now serves both the API and the frontend from a single server:
 
 ```bash
-# Start the FastAPI development server
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the server (serves API + frontend)
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The API will be available at: `http://localhost:8000`
+### Access Points
 
-### Interactive Documentation
+- **Frontend**: `http://localhost:8000/index.html`
+- **API**: `http://localhost:8000/scan`
+- **API Documentation**: `http://localhost:8000/docs`
+- **Health Check**: `http://localhost:8000/`
 
-Visit `http://localhost:8000/docs` for the Swagger UI documentation.
+### Features Available
+
+- Landing page with demo scanner
+- User signup/login with API key generation
+- Full XSS scanning interface
+- RESTful API for integrations
+
+### Demo Mode
+
+If MongoDB is not configured, the application runs in demo mode:
+- Accepts any API key for scanning
+- Stores user data in localStorage (browser-based)
+- No database required for testing
 
 ## 📚 API Documentation
 
