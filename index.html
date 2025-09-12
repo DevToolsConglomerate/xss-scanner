@@ -78,6 +78,9 @@
                 <a href="#api-docs" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300">
                     View API Docs
                 </a>
+                <a href="signup.html" class="bg-green-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300">
+                    Sign Up
+                </a>
                 <a href="signup.html" id="login-btn" class="bg-yellow-400 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition duration-300" style="display: none;">
                     Login
                 </a>
@@ -245,7 +248,11 @@
                     <div class="bg-white p-6 rounded-lg shadow-lg">
                         <div class="mb-4">
                             <label class="block text-gray-700 mb-2">Enter code to scan:</label>
-                            <textarea id="demo-code" class="w-full p-3 border border-gray-300 rounded-lg font-mono text-sm" rows="6" placeholder="Paste your HTML/JavaScript code here..."></textarea>
+                            <textarea id="demo-code" class="w-full p-3 border border-gray-300 rounded-lg font-mono text-sm" rows="6" placeholder="Paste your HTML/JavaScript code here...">// Example vulnerable code - try scanning this!
+element.innerHTML = userInput;
+document.write('<script>alert("XSS")</script>');
+eval(userCode);
+location.hash = 'malicious';</textarea>
                         </div>
                         <button id="scan-btn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
                             <i class="fas fa-search mr-2"></i>Scan for XSS
@@ -340,23 +347,121 @@
             });
         });
 
+        // XSS Scanner Class for client-side scanning
+        class XSSScanner {
+            constructor() {
+                this.vulnerabilityPatterns = this.getVulnerabilityPatterns();
+                this.maxVulnerabilities = 50;
+            }
+
+            getVulnerabilityPatterns() {
+                return {
+                    "innerHTML_assignment": /\.innerHTML\s*=\s*[^;]+/gi,
+                    "document_write_call": /document\.write\([^)]+\)/gi,
+                    "eval_function_call": /eval\([^)]+\)/gi,
+                    "location_hash_usage": /location\.hash/gi,
+                    "script_tag_injection": /<script[^>]*>.*?<\/script>/gi,
+                    "on_event_handler": /on\w+\s*=\s*[^>\s]+/gi,
+                    "javascript_protocol": /javascript:\s*[^"'\s]+/gi,
+                    "unescaped_user_input": /\.innerHTML\s*=\s*.*(\+.*userInput|\+.*req\.body|\+.*req\.query)/gi,
+                    "dangerous_src_assignment": /\.src\s*=\s*[^;]+/gi,
+                    "dangerous_href_assignment": /\.href\s*=\s*[^;]+/gi,
+                };
+            }
+
+            getVulnerabilityDescription(type) {
+                const descriptions = {
+                    "innerHTML_assignment": "Direct assignment to innerHTML can lead to XSS if user input is not sanitized",
+                    "document_write_call": "document.write() can execute malicious scripts",
+                    "eval_function_call": "eval() executes arbitrary code and is dangerous with user input",
+                    "location_hash_usage": "location.hash can be manipulated by attackers",
+                    "script_tag_injection": "Script tags can execute arbitrary JavaScript",
+                    "on_event_handler": "Inline event handlers can be exploited for XSS",
+                    "javascript_protocol": "javascript: URLs can execute malicious code",
+                    "unescaped_user_input": "User input assigned to innerHTML without proper escaping",
+                    "dangerous_src_assignment": "Dynamic src assignment can lead to script injection",
+                    "dangerous_href_assignment": "Dynamic href assignment can lead to script injection",
+                };
+                return descriptions[type] || "Potential XSS vulnerability detected";
+            }
+
+            isCommentedLine(line, matchPosition) {
+                const commentPatterns = [
+                    /^\s*\/\//,      // Single line comment (//)
+                    /^\s*#/,         // Python-style comment (#)
+                    /\/\*.*\*\//,    // Multi-line comment (/* */)
+                    /<!--.*-->/,     // HTML comment
+                ];
+
+                const textBeforeMatch = line.substring(0, matchPosition);
+                return commentPatterns.some(pattern => pattern.test(textBeforeMatch));
+            }
+
+            scanLineForVulnerabilities(line, lineNumber) {
+                const foundVulnerabilities = [];
+
+                for (const [type, pattern] of Object.entries(this.vulnerabilityPatterns)) {
+                    const matches = [...line.matchAll(pattern)];
+
+                    for (const match of matches) {
+                        if (!this.isCommentedLine(line, match.index)) {
+                            foundVulnerabilities.push({
+                                line: lineNumber,
+                                vulnerability_type: type,
+                                snippet: match[0].trim(),
+                                confidence: "medium",
+                                description: this.getVulnerabilityDescription(type)
+                            });
+                        }
+                    }
+                }
+
+                return foundVulnerabilities;
+            }
+
+            scanCode(code) {
+                try {
+                    // Limit code size for performance
+                    if (code.length > 50000) {
+                        code = code.substring(0, 50000);
+                    }
+
+                    const codeLines = code.split('\n');
+                    const allVulnerabilities = [];
+
+                    for (let i = 0; i < codeLines.length; i++) {
+                        if (allVulnerabilities.length >= this.maxVulnerabilities) {
+                            break;
+                        }
+
+                        const lineVulnerabilities = this.scanLineForVulnerabilities(codeLines[i], i + 1);
+                        allVulnerabilities.push(...lineVulnerabilities);
+                    }
+
+                    return {
+                        status: "success",
+                        vulnerabilities_found: allVulnerabilities.length,
+                        vulnerabilities: allVulnerabilities,
+                        message: `Scan completed. Found ${allVulnerabilities.length} potential vulnerabilities.`
+                    };
+
+                } catch (error) {
+                    throw new Error(`An error occurred during scanning: ${error.message}`);
+                }
+            }
+        }
+
         // Interactive demo functionality
         const scanBtn = document.getElementById('scan-btn');
         const demoCode = document.getElementById('demo-code');
         const demoResult = document.getElementById('demo-result');
         const resultText = document.getElementById('result-text');
+        const scanner = new XSSScanner();
 
         scanBtn.addEventListener('click', async () => {
             const code = demoCode.value.trim();
             if (code === '') {
                 resultText.textContent = 'Please enter some code to scan.';
-                demoResult.classList.remove('hidden');
-                return;
-            }
-
-            const apiKey = localStorage.getItem('xssApiKey');
-            if (!apiKey) {
-                resultText.innerHTML = 'Please <a href="signup.html" class="text-blue-600 underline">login</a> to get an API key and use the scanner.';
                 demoResult.classList.remove('hidden');
                 return;
             }
@@ -368,31 +473,19 @@
             scanBtn.textContent = 'Scanning...';
 
             try {
-                const response = await fetch('/scan', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': apiKey
-                    },
-                    body: JSON.stringify({ code })
-                });
+                // Use client-side scanner instead of API call
+                const result = scanner.scanCode(code);
 
-                const result = await response.json();
-
-                if (response.ok) {
-                    if (result.vulnerabilities_found > 0) {
-                        resultText.innerHTML = `<div class="text-red-600 mb-2">⚠️ Found ${result.vulnerabilities_found} potential XSS vulnerabilities:</div>`;
-                        result.vulnerabilities.forEach(vuln => {
-                            resultText.innerHTML += `<div class="text-sm text-gray-700 mb-1">Line ${vuln.line}: ${vuln.vulnerability_type} - ${vuln.description}</div>`;
-                        });
-                    } else {
-                        resultText.innerHTML = '<div class="text-green-600">✅ No XSS vulnerabilities detected in the provided code.</div>';
-                    }
+                if (result.vulnerabilities_found > 0) {
+                    resultText.innerHTML = `<div class="text-red-600 mb-2">⚠️ Found ${result.vulnerabilities_found} potential XSS vulnerabilities:</div>`;
+                    result.vulnerabilities.forEach(vuln => {
+                        resultText.innerHTML += `<div class="text-sm text-gray-700 mb-1">Line ${vuln.line}: ${vuln.vulnerability_type.replace(/_/g, ' ')} - ${vuln.description}</div>`;
+                    });
                 } else {
-                    resultText.textContent = `Error: ${result.detail || 'Scan failed'}`;
+                    resultText.innerHTML = '<div class="text-green-600">✅ No XSS vulnerabilities detected in the provided code.</div>';
                 }
             } catch (error) {
-                resultText.textContent = 'Error: Unable to connect to the API. Please try again later.';
+                resultText.textContent = `Error: ${error.message}`;
                 console.error('Scan error:', error);
             } finally {
                 scanBtn.disabled = false;

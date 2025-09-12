@@ -25,15 +25,22 @@ class XSSScanner:
         """
         return {
             "innerHTML_assignment": r"\.innerHTML\s*=\s*[^;]+",
-            "document_write_call": r"document\.write\([^)]+\)",
-            "eval_function_call": r"eval\([^)]+\)",
+            "document_write_call": r"document\.write\s*\([^)]*\)",
+            "eval_function_call": r"eval\s*\([^)]*\)",
             "location_hash_usage": r"location\.hash",
             "script_tag_injection": r"<script[^>]*>.*?</script>",
-            "on_event_handler": r"on\w+\s*=\s*[^>\s]+",
+            "on_event_handler": r"on\w+\s*=\s*['\"][^'\"]*['\"]",
             "javascript_protocol": r"javascript:\s*[^\"\'\s]+",
             "unescaped_user_input": r"\.innerHTML\s*=\s*.*(\+.*userInput|\+.*req\.body|\+.*req\.query)",
-            "dangerous_src_assignment": r"\.src\s*=\s*[^;]+",
-            "dangerous_href_assignment": r"\.href\s*=\s*[^;]+",
+            "dangerous_src_assignment": r"\.src\s*=\s*['\"][^'\"]*['\"]",
+            "dangerous_href_assignment": r"\.href\s*=\s*['\"][^'\"]*['\"]",
+            "template_literal_injection": r"`.*\$\{[^}]+\}.*`",
+            "insertAdjacentHTML_call": r"insertAdjacentHTML\s*\([^)]*\)",
+            "outerHTML_assignment": r"\.outerHTML\s*=\s*[^;]+",
+            "dangerous_setAttribute": r"setAttribute\s*\(\s*['\"](?:src|href|onclick|onload)['\"]\s*,",
+            "dangerous_createElement": r"createElement\s*\(\s*['\"]script['\"]\s*\)",
+            "dangerous_write": r"\.write\s*\([^)]*\)",
+            "dangerous_writeln": r"\.writeln\s*\([^)]*\)",
         }
 
     def _compile_patterns(self) -> Dict[str, Any]:
