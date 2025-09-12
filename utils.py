@@ -12,6 +12,9 @@ class XSSScanner:
 
     def __init__(self):
         self.vulnerability_patterns = self._get_vulnerability_patterns()
+        self.compiled_patterns = self._compile_patterns()
+        self.max_code_length = 50000  # Limit code size for performance
+        self.max_vulnerabilities = 50  # Limit results to prevent excessive output
 
     def _get_vulnerability_patterns(self) -> Dict[str, str]:
         """
@@ -32,6 +35,18 @@ class XSSScanner:
             "dangerous_src_assignment": r"\.src\s*=\s*[^;]+",
             "dangerous_href_assignment": r"\.href\s*=\s*[^;]+",
         }
+
+    def _compile_patterns(self) -> Dict[str, Any]:
+        """
+        Pre-compile regex patterns for better performance.
+
+        Returns:
+            Dictionary of compiled regex patterns
+        """
+        compiled = {}
+        for name, pattern in self.vulnerability_patterns.items():
+            compiled[name] = re.compile(pattern, re.IGNORECASE | re.DOTALL)
+        return compiled
 
     def _is_commented_line(self, line: str, match_position: int) -> bool:
         """
@@ -64,25 +79,23 @@ class XSSScanner:
     def _scan_line_for_vulnerabilities(
         self,
         line: str,
-        line_number: int,
-        patterns: Dict[str, str]
+        line_number: int
     ) -> List[Dict[str, Any]]:
         """
-        Scans a single line of code for XSS vulnerabilities.
+        Scans a single line of code for XSS vulnerabilities using compiled patterns.
 
         Args:
             line: The line of code to scan
             line_number: The line number in the original code
-            patterns: Dictionary of vulnerability patterns to check
 
         Returns:
             List of found vulnerabilities in this line
         """
         found_vulnerabilities = []
 
-        for vulnerability_name, pattern in patterns.items():
+        for vulnerability_name, compiled_pattern in self.compiled_patterns.items():
             # Find all matches of this pattern in the line
-            matches = re.finditer(pattern, line, re.IGNORECASE | re.DOTALL)
+            matches = compiled_pattern.finditer(line)
 
             for match in matches:
                 # Skip if this match appears to be in a comment
@@ -115,7 +128,7 @@ class XSSScanner:
 
     def scan_code(self, code: str) -> Dict[str, Any]:
         """
-        Scans provided code for XSS vulnerabilities.
+        Scans provided code for XSS vulnerabilities with performance optimizations.
 
         Args:
             code: The HTML/JavaScript code to analyze
@@ -126,17 +139,24 @@ class XSSScanner:
         try:
             logger.info("Starting XSS scan")
 
+            # Limit code size for performance
+            if len(code) > self.max_code_length:
+                code = code[:self.max_code_length]
+                logger.warning(f"Code truncated to {self.max_code_length} characters for performance")
+
             # Split the code into individual lines for analysis
             code_lines = code.splitlines()
 
             # List to store all found vulnerabilities
             all_vulnerabilities = []
 
-            # Scan each line of code
+            # Scan each line of code with early exit for performance
             for line_number, line in enumerate(code_lines, start=1):
-                line_vulnerabilities = self._scan_line_for_vulnerabilities(
-                    line, line_number, self.vulnerability_patterns
-                )
+                if len(all_vulnerabilities) >= self.max_vulnerabilities:
+                    logger.warning(f"Scan stopped early: reached maximum vulnerabilities limit ({self.max_vulnerabilities})")
+                    break
+
+                line_vulnerabilities = self._scan_line_for_vulnerabilities(line, line_number)
                 all_vulnerabilities.extend(line_vulnerabilities)
 
             result = {

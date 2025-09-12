@@ -333,6 +333,7 @@
                 const apiKey = 'xss-' + Math.random().toString(36).substr(2, 16);
                 document.getElementById('generated-api-key').textContent = apiKey;
                 // Store in localStorage
+                localStorage.setItem('userName', name);
                 localStorage.setItem('userEmail', email);
                 localStorage.setItem('userPassword', password);
                 localStorage.setItem('xssApiKey', apiKey);

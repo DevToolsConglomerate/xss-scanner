@@ -115,7 +115,7 @@
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold text-white">XSS Scanner</h1>
             <div class="flex items-center space-x-4">
-                <span class="text-gray-300">Welcome, User</span>
+                <span class="text-gray-300" id="welcome-user">Welcome, User</span>
                 <button onclick="logout()" class="text-blue-400 hover:text-blue-300">Logout</button>
             </div>
         </div>
@@ -150,6 +150,14 @@
             window.location.href = 'login.html';
         }
 
+        // Set welcome message with user's first name
+        const storedName = localStorage.getItem('userName');
+        const welcomeUserSpan = document.getElementById('welcome-user');
+        if (storedName && welcomeUserSpan) {
+            const firstName = storedName.split(' ')[0];
+            welcomeUserSpan.textContent = `Welcome, ${firstName}`;
+        }
+
         function logout() {
             localStorage.removeItem('loggedIn');
             window.location.href = 'index.html';
@@ -159,7 +167,7 @@
             const code = document.getElementById('code-input').value;
             const resultsSection = document.getElementById('results-section');
             const resultsContent = document.getElementById('results-content');
-            const scanBtn = document.getElementById('scan-btn');
+            const scanBtn = document.querySelector('.btn-scan');
 
             if (!code.trim()) {
                 alert('Please enter some code to scan.');
@@ -180,14 +188,20 @@
             scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Scanning...';
 
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2 * 60 * 1000); // 2 minutes timeout
+
                 const response = await fetch('/scan', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-API-Key': apiKey
                     },
-                    body: JSON.stringify({ code })
+                    body: JSON.stringify({ code }),
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
 
                 const result = await response.json();
 
@@ -212,8 +226,12 @@
                     resultsContent.innerHTML = `<div class="text-red-400"><i class="fas fa-exclamation-circle mr-2"></i>Error: ${result.detail || 'Scan failed'}</div>`;
                 }
             } catch (error) {
-                resultsContent.innerHTML = '<div class="text-red-400"><i class="fas fa-exclamation-circle mr-2"></i>Error: Unable to connect to the API. Please try again later.</div>';
-                console.error('Scan error:', error);
+                if (error.name === 'AbortError') {
+                    resultsContent.innerHTML = '<div class="text-red-400"><i class="fas fa-exclamation-circle mr-2"></i>Error: Scan timed out after 2 minutes. Please try with smaller code snippets.</div>';
+                } else {
+                    resultsContent.innerHTML = '<div class="text-red-400"><i class="fas fa-exclamation-circle mr-2"></i>Error: Unable to connect to the API. Please try again later.</div>';
+                    console.error('Scan error:', error);
+                }
             } finally {
                 scanBtn.disabled = false;
                 scanBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Scan for XSS';

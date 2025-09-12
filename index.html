@@ -78,8 +78,8 @@
                 <a href="#api-docs" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300">
                     View API Docs
                 </a>
-                <a href="signup.html" id="signup-btn" class="bg-yellow-400 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition duration-300" style="display: none;">
-                    Sign Up
+                <a href="signup.html" id="login-btn" class="bg-yellow-400 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-yellow-300 transition duration-300" style="display: none;">
+                    Login
                 </a>
             </div>
         </div>
@@ -281,7 +281,7 @@
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-map-marker-alt text-blue-400 mr-3"></i>
-                            <span>Tema Community 25, Accra Ghana</span>
+                            <span>Tema Community 25 - Accra, Ghana</span>
                         </div>
                     </div>
                 </div>
@@ -356,7 +356,7 @@
 
             const apiKey = localStorage.getItem('xssApiKey');
             if (!apiKey) {
-                resultText.innerHTML = 'Please <a href="signup.html" class="text-blue-600 underline">sign up</a> to get an API key and use the scanner.';
+                resultText.innerHTML = 'Please <a href="signup.html" class="text-blue-600 underline">login</a> to get an API key and use the scanner.';
                 demoResult.classList.remove('hidden');
                 return;
             }
@@ -418,18 +418,18 @@
             observer.observe(section);
         });
 
-        // Check for API key and show/hide signup button and nav link
+        // Check for API key and show/hide login button and nav link
         const apiKey = localStorage.getItem('xssApiKey');
-        const signupBtn = document.getElementById('signup-btn');
+        const loginBtn = document.getElementById('login-btn');
         const navLinks = document.getElementById('nav-links');
         if (!apiKey) {
-            signupBtn.style.display = 'inline-block';
-            signupBtn.href = 'signup.html';
-            const signupNavLink = document.createElement('a');
-            signupNavLink.href = 'signup.html';
-            signupNavLink.className = 'text-gray-600 hover:text-blue-600 transition duration-300';
-            signupNavLink.textContent = 'Sign Up';
-            navLinks.appendChild(signupNavLink);
+            loginBtn.style.display = 'inline-block';
+            loginBtn.href = 'signup.html';
+            const loginNavLink = document.createElement('a');
+            loginNavLink.href = 'signup.html';
+            loginNavLink.className = 'text-gray-600 hover:text-blue-600 transition duration-300';
+            loginNavLink.textContent = 'Login';
+            navLinks.appendChild(loginNavLink);
         }
     </script>
 </body>
