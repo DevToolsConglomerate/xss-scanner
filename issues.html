@@ -357,7 +357,7 @@
                     <div class="space-y-4">
                         <div class="flex items-center">
                             <i class="fas fa-envelope text-blue-400 mr-3"></i>
-                            <span>devtoolsconglomerate.support@gamil.com</span>
+                            <span>devtoolsconglomerate.support@gmail.com</span>
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-phone text-blue-400 mr-3"></i>
@@ -447,22 +447,41 @@
                 newsletter: document.getElementById('newsletter-signup').checked
             };
 
+            // Create email content
+            const emailSubject = encodeURIComponent(`XSS Scanner Issue Report: ${formData.title}`);
+            const emailBody = encodeURIComponent(
+                `Issue Report Details:\n\n` +
+                `Reporter: ${formData.name} (${formData.email})\n` +
+                `Issue Type: ${formData.type}\n` +
+                `Priority: ${formData.priority}\n` +
+                `Newsletter Signup: ${formData.newsletter ? 'Yes' : 'No'}\n\n` +
+                `Description:\n${formData.description}\n\n` +
+                `${formData.codeSample ? `Code Sample:\n${formData.codeSample}\n\n` : ''}` +
+                `---\n` +
+                `This issue was reported via the XSS Scanner Issues page.\n` +
+                `Please investigate and respond to the reporter at: ${formData.email}`
+            );
+
+            // Open email client with pre-filled content
+            const mailtoLink = `mailto:devtoolsconglomerate.support@gmail.com?subject=${emailSubject}&body=${emailBody}`;
+            window.location.href = mailtoLink;
+
             // Show success message
             const submitBtn = issueForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Issue Reported Successfully!';
+            submitBtn.innerHTML = '<i class="fas fa-envelope mr-2"></i>Email Client Opened!';
             submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
             submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
 
-            // Reset form after 3 seconds
+            // Reset form after 5 seconds
             setTimeout(() => {
                 issueForm.reset();
                 submitBtn.innerHTML = originalText;
                 submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
                 submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            }, 3000);
+            }, 5000);
 
-            console.log('Issue reported:', formData);
+            console.log('Issue report email opened:', formData);
         });
 
         // Add fade-in animation on scroll

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XSS Scanner - Scan Your Code</title>
+    <title>XSS Scanner - Advanced Vulnerability Detection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -103,6 +103,50 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
         }
+        .tab-button {
+            background: rgba(71, 85, 105, 0.5);
+            color: #cbd5e0;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background: rgba(99, 179, 237, 0.2);
+            color: #63b3ed;
+            border-bottom: 2px solid #63b3ed;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .url-input {
+            background: rgba(26, 32, 44, 0.8);
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            color: #e2e8f0;
+            padding: 12px;
+        }
+        .url-input:focus {
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(71, 85, 105, 0.5);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #63b3ed, #3182ce);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -123,18 +167,49 @@
 
     <div class="container mx-auto p-8">
         <div class="scanner-card p-8 max-w-4xl mx-auto">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">XSS Vulnerability Scanner</h2>
-            <p class="text-gray-300 mb-6 text-center">Paste your HTML/JavaScript code below to scan for XSS vulnerabilities</p>
+            <h2 class="text-3xl font-bold text-white mb-6 text-center">Advanced XSS Vulnerability Scanner</h2>
+            <p class="text-gray-300 mb-8 text-center">Scan code snippets or entire websites for XSS vulnerabilities</p>
 
-            <div class="mb-6">
-                <label for="code-input" class="block text-white font-semibold mb-2">Code to Scan:</label>
-                <textarea id="code-input" class="input-area w-full p-4 text-sm" rows="10" placeholder="Enter your code here..."></textarea>
+            <!-- Tab Navigation -->
+            <div class="flex mb-6 border-b border-gray-600">
+                <button class="tab-button active" onclick="switchTab('code')">Code Scanner</button>
+                <button class="tab-button" onclick="switchTab('website')">Website Scanner</button>
             </div>
 
+            <!-- Code Scanner Tab -->
+            <div id="code-tab" class="tab-content active">
+                <div class="mb-6">
+                    <label for="code-input" class="block text-white font-semibold mb-2">Code to Scan:</label>
+                    <textarea id="code-input" class="input-area w-full p-4 text-sm" rows="12" placeholder="Paste your HTML/JavaScript code here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Website Scanner Tab -->
+            <div id="website-tab" class="tab-content">
+                <div class="mb-6">
+                    <label for="url-input" class="block text-white font-semibold mb-2">Website URL:</label>
+                    <div class="flex gap-2">
+                        <input type="url" id="url-input" class="url-input flex-1" placeholder="https://example.com" />
+                        <button onclick="testUrl()" class="btn-scan px-4 py-2">
+                            <i class="fas fa-link mr-2"></i>Test URL
+                        </button>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-2">Enter a complete URL including https:// or http://</p>
+                </div>
+                <div id="url-status" class="mb-4" style="display: none;"></div>
+            </div>
+
+            <!-- Scan Controls -->
             <div class="text-center mb-6">
-                <button onclick="scanCode()" class="btn-scan px-8 py-3 text-lg">
+                <button onclick="scanCode()" class="btn-scan px-8 py-3 text-lg" id="scan-btn">
                     <i class="fas fa-search mr-2"></i>Scan for XSS
                 </button>
+                <div id="progress-container" class="mt-4" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-2" id="progress-text">Scanning...</p>
+                </div>
             </div>
 
             <div id="results-section" class="results-area p-4" style="display: none;">
@@ -145,6 +220,10 @@
     </div>
 
     <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin;
+        const SCAN_TIMEOUT = 5 * 60 * 1000; // 5 minutes timeout
+
         // Check if user has API key
         if (!localStorage.getItem('xssApiKey')) {
             window.location.href = 'login.html';
@@ -163,15 +242,120 @@
             window.location.href = 'index.html';
         }
 
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Activate selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Update scan button text
+            const scanBtn = document.getElementById('scan-btn');
+            if (tabName === 'website') {
+                scanBtn.innerHTML = '<i class="fas fa-globe mr-2"></i>Scan Website';
+            } else {
+                scanBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Scan Code';
+            }
+        }
+
+        async function testUrl() {
+            const urlInput = document.getElementById('url-input');
+            const urlStatus = document.getElementById('url-status');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showUrlStatus('Please enter a URL', 'error');
+                return;
+            }
+
+            if (!isValidUrl(url)) {
+                showUrlStatus('Please enter a valid URL (including http:// or https://)', 'error');
+                return;
+            }
+
+            showUrlStatus('Testing URL...', 'info');
+
+            try {
+                const response = await fetch('/test-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': localStorage.getItem('xssApiKey')
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showUrlStatus(`✅ URL is accessible. Found ${result.page_count} pages to scan.`, 'success');
+                } else {
+                    showUrlStatus(`❌ ${result.detail || 'URL is not accessible'}`, 'error');
+                }
+            } catch (error) {
+                showUrlStatus('❌ Unable to test URL. Please check the URL and try again.', 'error');
+            }
+        }
+
+        function showUrlStatus(message, type) {
+            const urlStatus = document.getElementById('url-status');
+            urlStatus.style.display = 'block';
+            urlStatus.className = `mb-4 p-3 rounded ${getStatusStyles(type)}`;
+            urlStatus.innerHTML = message;
+        }
+
+        function getStatusStyles(type) {
+            switch (type) {
+                case 'success': return 'bg-green-100 text-green-800 border border-green-300';
+                case 'error': return 'bg-red-100 text-red-800 border border-red-300';
+                case 'info': return 'bg-blue-100 text-blue-800 border border-blue-300';
+                default: return 'bg-gray-100 text-gray-800 border border-gray-300';
+            }
+        }
+
+        function isValidUrl(url) {
+            try {
+                new URL(url);
+                return url.startsWith('http://') || url.startsWith('https://');
+            } catch {
+                return false;
+            }
+        }
+
         async function scanCode() {
-            const code = document.getElementById('code-input').value;
+            const codeInput = document.getElementById('code-input');
+            const urlInput = document.getElementById('url-input');
             const resultsSection = document.getElementById('results-section');
             const resultsContent = document.getElementById('results-content');
-            const scanBtn = document.querySelector('.btn-scan');
+            const scanBtn = document.getElementById('scan-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
 
-            if (!code.trim()) {
-                alert('Please enter some code to scan.');
-                return;
+            // Determine scan type and get input
+            const activeTab = document.querySelector('.tab-content.active').id;
+            let input, scanType;
+
+            if (activeTab === 'code-tab') {
+                input = codeInput.value;
+                scanType = 'code';
+                if (!input.trim()) {
+                    alert('Please enter some code to scan.');
+                    return;
+                }
+            } else {
+                input = urlInput.value;
+                scanType = 'website';
+                if (!input.trim()) {
+                    alert('Please enter a URL to scan.');
+                    return;
+                }
+                if (!isValidUrl(input)) {
+                    alert('Please enter a valid URL (including http:// or https://)');
+                    return;
+                }
             }
 
             const apiKey = localStorage.getItem('xssApiKey');
@@ -183,62 +367,178 @@
 
             // Show loading state
             resultsSection.style.display = 'block';
-            resultsContent.innerHTML = '<div class="text-blue-400"><i class="fas fa-spinner fa-spin mr-2"></i>Scanning your code...</div>';
+            resultsContent.innerHTML = `<div class="text-blue-400"><i class="fas fa-spinner fa-spin mr-2"></i>Initializing scan...</div>`;
             scanBtn.disabled = true;
-            scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Scanning...';
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '10%';
+            progressText.textContent = 'Preparing scan...';
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2 * 60 * 1000); // 2 minutes timeout
+                const timeoutId = setTimeout(() => controller.abort(), SCAN_TIMEOUT);
 
-                const response = await fetch('/scan', {
+                // Progress simulation
+                const progressInterval = setInterval(() => {
+                    const currentWidth = parseInt(progressFill.style.width);
+                    if (currentWidth < 90) {
+                        progressFill.style.width = (currentWidth + 5) + '%';
+                        progressText.textContent = 'Scanning...';
+                    }
+                }, 1000);
+
+                const endpoint = scanType === 'website' ? '/scan-website' : '/scan';
+                const requestBody = scanType === 'website' ? { url: input } : { code: input };
+
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-API-Key': apiKey
                     },
-                    body: JSON.stringify({ code }),
+                    body: JSON.stringify(requestBody),
                     signal: controller.signal
                 });
 
                 clearTimeout(timeoutId);
+                clearInterval(progressInterval);
+
+                progressFill.style.width = '100%';
+                progressText.textContent = 'Processing results...';
 
                 const result = await response.json();
 
+                // Display results
+                resultsContent.innerHTML = '';
+
                 if (response.ok) {
-                    resultsContent.innerHTML = '';
                     if (result.vulnerabilities_found > 0) {
-                        resultsContent.innerHTML = `<div class="vulnerable text-red-400 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i>Found ${result.vulnerabilities_found} potential XSS vulnerabilities:</div>`;
-                        result.vulnerabilities.forEach(vuln => {
+                        resultsContent.innerHTML = `
+                            <div class="vulnerable text-red-400 mb-4 p-3 bg-red-50 rounded border border-red-300">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Found ${result.vulnerabilities_found} potential XSS vulnerabilities
+                            </div>
+                        `;
+
+                        result.vulnerabilities.forEach((vuln, index) => {
+                            const severityColor = getSeverityColor(vuln.confidence || vuln.severity);
                             resultsContent.innerHTML += `
-                                <div class="vulnerable mb-2 p-3 border border-red-500 rounded bg-red-50">
-                                    <div class="font-semibold text-red-700 mb-1">${vuln.vulnerability_type}</div>
-                                    <div class="text-sm text-gray-600 mb-1">Line ${vuln.line}: ${vuln.description}</div>
-                                    <div class="text-xs text-gray-500">Snippet: <code class="bg-gray-100 px-1 rounded">${escapeHtml(vuln.snippet)}</code></div>
+                                <div class="mb-3 p-4 border rounded ${severityColor.border} ${severityColor.bg}">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div class="font-semibold ${severityColor.text}">${vuln.vulnerability_type}</div>
+                                        <span class="text-xs px-2 py-1 rounded ${severityColor.badge}">${vuln.confidence || vuln.severity || 'medium'}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600 mb-2">
+                                        ${vuln.description || 'Potential XSS vulnerability detected'}
+                                    </div>
+                                    <div class="text-xs text-gray-500 mb-1">
+                                        ${scanType === 'website' ? `Location: ${vuln.location || 'Unknown'}` : `Line ${vuln.line || 'N/A'}`}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        Snippet: <code class="bg-gray-100 px-2 py-1 rounded text-xs">${escapeHtml(vuln.snippet || vuln.code_snippet)}</code>
+                                    </div>
                                 </div>
                             `;
                         });
-                        resultsContent.innerHTML += '<div class="text-yellow-600 mt-4 p-2 bg-yellow-50 rounded"><i class="fas fa-info-circle mr-2"></i>Note: This scan uses heuristic patterns. Always perform manual code review for critical applications.</div>';
+
+                        resultsContent.innerHTML += `
+                            <div class="mt-4 p-3 bg-yellow-50 rounded border border-yellow-300">
+                                <div class="text-yellow-800 mb-2"><i class="fas fa-info-circle mr-2"></i>Security Recommendations:</div>
+                                <ul class="text-sm text-yellow-700 list-disc list-inside space-y-1">
+                                    <li>Always sanitize user input before displaying it</li>
+                                    <li>Use Content Security Policy (CSP) headers</li>
+                                    <li>Consider using safer alternatives like textContent instead of innerHTML</li>
+                                    <li>Validate and sanitize all dynamic content</li>
+                                </ul>
+                            </div>
+                        `;
                     } else {
-                        resultsContent.innerHTML = '<div class="safe text-green-400 p-3 bg-green-50 rounded"><i class="fas fa-check-circle mr-2"></i>No XSS vulnerabilities detected in the provided code.</div>';
+                        resultsContent.innerHTML = `
+                            <div class="safe text-green-400 p-4 bg-green-50 rounded border border-green-300">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                No XSS vulnerabilities detected in the ${scanType === 'website' ? 'website' : 'provided code'}.
+                            </div>
+                        `;
                     }
+
+                    // Show scan summary
+                    resultsContent.innerHTML += `
+                        <div class="mt-4 p-3 bg-blue-50 rounded border border-blue-300">
+                            <div class="text-blue-800 text-sm">
+                                <i class="fas fa-chart-bar mr-2"></i>
+                                Scan Summary: ${result.scan_summary || 'Scan completed successfully'}
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    resultsContent.innerHTML = `<div class="text-red-400"><i class="fas fa-exclamation-circle mr-2"></i>Error: ${result.detail || 'Scan failed'}</div>`;
+                    resultsContent.innerHTML = `
+                        <div class="text-red-400 p-3 bg-red-50 rounded border border-red-300">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            Error: ${result.detail || result.message || 'Scan failed'}
+                        </div>
+                    `;
                 }
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    resultsContent.innerHTML = '<div class="text-red-400"><i class="fas fa-exclamation-circle mr-2"></i>Error: Scan timed out after 2 minutes. Please try with smaller code snippets.</div>';
+                    resultsContent.innerHTML = `
+                        <div class="text-red-400 p-3 bg-red-50 rounded border border-red-300">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            Error: Scan timed out after ${SCAN_TIMEOUT / 60000} minutes. Please try with a smaller ${scanType}.
+                        </div>
+                    `;
                 } else {
-                    resultsContent.innerHTML = '<div class="text-red-400"><i class="fas fa-exclamation-circle mr-2"></i>Error: Unable to connect to the API. Please try again later.</div>';
+                    resultsContent.innerHTML = `
+                        <div class="text-red-400 p-3 bg-red-50 rounded border border-red-300">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            Error: Unable to connect to the API. Please try again later.
+                        </div>
+                    `;
                     console.error('Scan error:', error);
                 }
             } finally {
                 scanBtn.disabled = false;
-                scanBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Scan for XSS';
+                scanBtn.innerHTML = scanType === 'website' ?
+                    '<i class="fas fa-globe mr-2"></i>Scan Website' :
+                    '<i class="fas fa-search mr-2"></i>Scan Code';
+                progressContainer.style.display = 'none';
+            }
+        }
+
+        function getSeverityColor(severity) {
+            switch (severity?.toLowerCase()) {
+                case 'high':
+                case 'critical':
+                    return {
+                        text: 'text-red-700',
+                        bg: 'bg-red-50',
+                        border: 'border-red-300',
+                        badge: 'bg-red-200 text-red-800'
+                    };
+                case 'medium':
+                    return {
+                        text: 'text-orange-700',
+                        bg: 'bg-orange-50',
+                        border: 'border-orange-300',
+                        badge: 'bg-orange-200 text-orange-800'
+                    };
+                case 'low':
+                    return {
+                        text: 'text-yellow-700',
+                        bg: 'bg-yellow-50',
+                        border: 'border-yellow-300',
+                        badge: 'bg-yellow-200 text-yellow-800'
+                    };
+                default:
+                    return {
+                        text: 'text-blue-700',
+                        bg: 'bg-blue-50',
+                        border: 'border-blue-300',
+                        badge: 'bg-blue-200 text-blue-800'
+                    };
             }
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const map = {
                 '&': '&amp;',
                 '<': '<',
@@ -248,6 +548,12 @@
             };
             return text.replace(/[&<>"']/g, function(m) { return map[m]; });
         }
+
+        // Auto-resize textarea
+        document.getElementById('code-input').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
     </script>
 </body>
 </html>
