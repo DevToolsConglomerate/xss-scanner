@@ -355,7 +355,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 If you encounter any issues or have questions:
 
-1. Check the [Issues](https://github.com/DevToolsConglomerate/xss-scanner/issues) page
+1. Check the [Issues](https://xss-scanner.vercel.app/issues.html) page
 2. Review the API documentation at `/docs`
 3. Create a new issue with detailed information
 
