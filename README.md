@@ -2,6 +2,10 @@
 
 A fast, automated API to scan HTML and JavaScript code snippets for potential Cross-Site Scripting (XSS) vulnerabilities. Uses heuristic patterns to identify dangerous coding practices.
 
+## 🔒 Security Enhanced Version
+
+This is a security-hardened version that addresses critical vulnerabilities and implements industry best practices for web application security.
+
 ## 🚀 Features
 
 - **Fast Scanning**: Built with FastAPI for high-performance analysis
@@ -15,6 +19,21 @@ A fast, automated API to scan HTML and JavaScript code snippets for potential Cr
 - **RESTful API**: Simple HTTP endpoints for easy integration
 - **Authentication**: Secure API key-based authentication
 - **Cloud Deployment**: Ready for Vercel serverless deployment
+
+## 🛡️ Security Features
+
+### Critical Security Issues Fixed
+- **Hardcoded Secret Key**: Replaced with secure random key generation using `secrets.token_hex(32)`
+- **Authentication Bypass**: Removed demo mode bypass, always validates against database
+- **Input Validation**: Added comprehensive validation for code size and content
+- **Rate Limiting**: Configurable rate limiting (default: 60 requests/minute) to prevent abuse
+- **Error Handling**: Proper error responses without information leakage
+
+### Security Enhancements
+- **Input Sanitization**: Code length limits and malicious pattern detection
+- **Secure Authentication**: No fallback to insecure demo mode
+- **Comprehensive Logging**: Security event monitoring and performance metrics
+- **Memory Management**: Configurable limits to prevent memory exhaustion
 
 ## 📋 Table of Contents
 
@@ -294,11 +313,21 @@ scanCode('<div innerHTML=userInput></div>');
 ```
 xss-scanner/
 ├── main.py                 # Main FastAPI application
+├── config.py              # Application configuration
+├── models.py              # Pydantic data models
+├── utils.py               # XSS scanner utilities
 ├── api/
 │   └── vercel_bootstrap.py # Vercel deployment bootstrap
 ├── index.html             # Landing page
+├── login.html             # Login page
+├── signup.html            # Signup page
+├── scan.html              # Scanner interface
 ├── requirements.txt       # Python dependencies
 ├── build.sh              # Vercel build script
+├── deploy_secure.sh       # Secure deployment script
+├── security_test.py       # Security testing utilities
+├── test_scanner.py        # Comprehensive test suite
+├── TODO.md               # Development task tracking
 ├── README.md             # This file
 └── .env                  # Environment variables (create this)
 ```
@@ -326,7 +355,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 If you encounter any issues or have questions:
 
-1. Check the [Issues](https://github.com/your-username/xss-scanner-api/issues) page
+1. Check the [Issues](https://github.com/DevToolsConglomerate/xss-scanner/issues) page
 2. Review the API documentation at `/docs`
 3. Create a new issue with detailed information
 

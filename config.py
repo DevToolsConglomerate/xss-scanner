@@ -3,6 +3,7 @@ Configuration management for XSS Scanner API
 """
 import os
 from typing import Optional
+import secrets
 
 class Config:
     """Application configuration class"""
@@ -19,11 +20,18 @@ class Config:
     API_HOST: str = os.getenv("API_HOST", "0.0.0.0")
     API_PORT: int = int(os.getenv("API_PORT", "8000"))
 
-    # Security
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
+    # Security - Generate secure random key if not provided
+    SECRET_KEY: str = os.getenv("SECRET_KEY") or secrets.token_hex(32)
 
     # CORS
     ALLOWED_ORIGINS: list = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
+
+    # Rate limiting
+    RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "60"))
+
+    # Scanner settings
+    MAX_CODE_LENGTH: int = int(os.getenv("MAX_CODE_LENGTH", "100000"))
+    MAX_VULNERABILITIES: int = int(os.getenv("MAX_VULNERABILITIES", "50"))
 
     @property
     def is_database_enabled(self) -> bool:

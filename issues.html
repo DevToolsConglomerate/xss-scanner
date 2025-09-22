@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues & Support - XSS Scanner API</title>
+    <meta name="description" content="Get help with XSS Scanner API issues, troubleshooting, and support. Find solutions to common problems and report new issues.">
+    <meta name="keywords" content="XSS Scanner Support, Issues, Troubleshooting, Help, FAQ">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .hero-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .issue-card:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s ease;
+        }
+        .smooth-scroll {
+            scroll-behavior: smooth;
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-open { background-color: #fef3c7; color: #92400e; }
+        .status-resolved { background-color: #d1fae5; color: #065f46; }
+        .status-in-progress { background-color: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body class="smooth-scroll">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-xl font-bold text-gray-800">XSS Scanner API</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8" id="nav-links">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600 transition duration-300">Home</a>
+                    <a href="scan.html" class="text-gray-600 hover:text-blue-600 transition duration-300">Scanner</a>
+                    <a href="issues.html" class="text-blue-600 font-semibold">Issues</a>
+                    <a href="#contact" class="text-gray-600 hover:text-blue-600 transition duration-300">Contact</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
+            <a href="index.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">Home</a>
+            <a href="scan.html" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">Scanner</a>
+            <a href="issues.html" class="block px-4 py-2 text-blue-600 font-semibold">Issues</a>
+            <a href="#contact" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-20 pt-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center fade-in">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                Issues & <span class="text-yellow-300">Support</span>
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+                Get help with XSS Scanner API issues, find solutions to common problems, and get the support you need.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="#common-issues" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300">
+                    Common Issues
+                </a>
+                <a href="#report-issue" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition duration-300">
+                    Report Issue
+                </a>
+                <a href="#faq" class="bg-green-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300">
+                    FAQ
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Help Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="bg-blue-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Search Issues</h3>
+                    <p class="text-gray-600">Browse common issues and solutions</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-green-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-question-circle text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">FAQ</h3>
+                    <p class="text-gray-600">Find answers to frequently asked questions</p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-purple-600 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-headset text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Contact Support</h3>
+                    <p class="text-gray-600">Get direct help from our support team</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Common Issues Section -->
+    <section id="common-issues" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Common Issues</h2>
+            <div class="space-y-8">
+                <!-- Issue 1 -->
+                <div class="issue-card bg-white border border-gray-200 rounded-lg shadow-lg p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">API Key Authentication Failed</h3>
+                            <p class="text-gray-600 mb-3">Error: "Invalid or inactive API key" when making API requests</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="status-badge status-open">Open</span>
+                                <span class="text-sm text-gray-500">Updated: 2 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">High Priority</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h4 class="font-semibold mb-2">Troubleshooting Steps:</h4>
+                        <ol class="list-decimal list-inside space-y-1 text-gray-700">
+                            <li>Verify your API key is correctly copied from the dashboard</li>
+                            <li>Check if your API key is active in your account settings</li>
+                            <li>Ensure you're using the correct header format: <code class="bg-gray-200 px-2 py-1 rounded">X-API-Key: your_api_key</code></li>
+                            <li>Confirm your subscription is active and not expired</li>
+                        </ol>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-user mr-1"></i> Reported by: 15 users
+                        </div>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Issue 2 -->
+                <div class="issue-card bg-white border border-gray-200 rounded-lg shadow-lg p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Rate Limiting Errors</h3>
+                            <p class="text-gray-600 mb-3">Error: "Rate limit exceeded. Please try again later."</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="status-badge status-resolved">Resolved</span>
+                                <span class="text-sm text-gray-500">Updated: 1 day ago</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">Medium Priority</span>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg mb-4">
+                        <h4 class="font-semibold mb-2 text-green-800">✅ Solution:</h4>
+                        <p class="text-gray-700">The rate limiting has been increased to 120 requests per minute for all users. If you're still experiencing issues, please contact support.</p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-user mr-1"></i> Reported by: 8 users
+                        </div>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Issue 3 -->
+                <div class="issue-card bg-white border border-gray-200 rounded-lg shadow-lg p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">False Positive Detection</h3>
+                            <p class="text-gray-600 mb-3">Scanner incorrectly flags safe code as vulnerable</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="status-badge status-in-progress">In Progress</span>
+                                <span class="text-sm text-gray-500">Updated: 3 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Low Priority</span>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <h4 class="font-semibold mb-2 text-blue-800">🔧 Workaround:</h4>
+                        <p class="text-gray-700">You can temporarily disable specific pattern matching by adding comments to your code. Our team is working on improving the accuracy of the detection algorithms.</p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-user mr-1"></i> Reported by: 23 users
+                        </div>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Issue 4 -->
+                <div class="issue-card bg-white border border-gray-200 rounded-lg shadow-lg p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">MongoDB Connection Issues</h3>
+                            <p class="text-gray-600 mb-3">Database connection fails in production environment</p>
+                            <div class="flex items-center space-x-4">
+                                <span class="status-badge status-resolved">Resolved</span>
+                                <span class="text-sm text-gray-500">Updated: 5 hours ago</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">High Priority</span>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg mb-4">
+                        <h4 class="font-semibold mb-2 text-green-800">✅ Solution:</h4>
+                        <p class="text-gray-700">Updated connection string format and added retry logic. Please update your environment variables and redeploy.</p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-user mr-1"></i> Reported by: 12 users
+                        </div>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Frequently Asked Questions</h2>
+            <div class="space-y-6">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">How do I get an API key?</h3>
+                    <p class="text-gray-600">You can get an API key by signing up on our website. After registration, you'll receive your API key in the dashboard. Make sure to keep it secure and don't share it publicly.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">What are the rate limits?</h3>
+                    <p class="text-gray-600">The current rate limit is 120 requests per minute for all users. If you need higher limits, please contact our support team to discuss enterprise options.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Why am I getting false positives?</h3>
+                    <p class="text-gray-600">Our scanner uses pattern-based detection which may occasionally flag safe code. We're continuously improving our algorithms. You can help by reporting false positives through our issue tracker.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">How do I integrate the API with my application?</h3>
+                    <p class="text-gray-600">You can integrate our API using simple HTTP requests. Check our API documentation for code examples in various programming languages including Python, JavaScript, and cURL.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">Is my code stored on your servers?</h3>
+                    <p class="text-gray-600">No, your code is processed in memory and not stored on our servers. We take privacy seriously and only log metadata for debugging purposes.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-800">What programming languages are supported?</h3>
+                    <p class="text-gray-600">Our scanner works with any HTML, JavaScript, or mixed web content. It can detect XSS vulnerabilities in code written in any programming language that generates web content.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Report Issue Section -->
+    <section id="report-issue" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Report an Issue</h2>
+            <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-8">
+                <form id="issue-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Your Name *</label>
+                            <input type="text" id="reporter-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Email Address *</label>
+                            <input type="email" id="reporter-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Issue Title *</label>
+                        <input type="text" id="issue-title" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Brief description of the issue" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Issue Type *</label>
+                        <select id="issue-type" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select issue type</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="documentation">Documentation Issue</option>
+                            <option value="performance">Performance Issue</option>
+                            <option value="security">Security Concern</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Priority Level</label>
+                        <select id="issue-priority" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Describe the Issue *</label>
+                        <textarea id="issue-description" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Please provide detailed information about the issue, including steps to reproduce, expected behavior, and actual behavior." required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Code Sample (if applicable)</label>
+                        <textarea id="code-sample" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm" placeholder="Paste relevant code here..."></textarea>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="newsletter-signup" class="mr-3">
+                        <label for="newsletter-signup" class="text-gray-700">Subscribe to updates about this issue</label>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                        <i class="fas fa-paper-plane mr-2"></i>Submit Issue Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray-800 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Still Need Help?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Contact Support</h3>
+                    <p class="mb-6 text-gray-300">
+                        Can't find what you're looking for? Our support team is here to help you resolve any issues.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-blue-400 mr-3"></i>
+                            <span>devtoolsconglomerate.support@gamil.com</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-blue-400 mr-3"></i>
+                            <span>+233 (059) 615-4533</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-clock text-blue-400 mr-3"></i>
+                            <span>Response time: Within 24 hours</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4">Additional Resources</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                            <span>API Documentation</span>
+                            <a href="index.html#api-docs" class="text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                            <span>GitHub Repository</span>
+                            <a href="https://github.com/DevToolsConglomerate/xss-scanner" class="text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                            <span>Community Forum</span>
+                            <a href="#" class="text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p>&copy; 2025 DevTools Conglomerate. All rights reserved.</p>
+            <div class="mt-4">
+                <a href="#" class="text-gray-400 hover:text-white mx-2">Privacy Policy</a>
+                <a href="#" class="text-gray-400 hover:text-white mx-2">Terms of Service</a>
+                <a href="https://github.com/DevToolsConglomerate/xss-scanner/blob/main/README.md" class="text-gray-400 hover:text-white mx-2">Documentation</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Issue form submission
+        const issueForm = document.getElementById('issue-form');
+        issueForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form data
+            const formData = {
+                name: document.getElementById('reporter-name').value,
+                email: document.getElementById('reporter-email').value,
+                title: document.getElementById('issue-title').value,
+                type: document.getElementById('issue-type').value,
+                priority: document.getElementById('issue-priority').value,
+                description: document.getElementById('issue-description').value,
+                codeSample: document.getElementById('code-sample').value,
+                newsletter: document.getElementById('newsletter-signup').checked
+            };
+
+            // Show success message
+            const submitBtn = issueForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Issue Reported Successfully!';
+            submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+
+            // Reset form after 3 seconds
+            setTimeout(() => {
+                issueForm.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }, 3000);
+
+            console.log('Issue reported:', formData);
+        });
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

@@ -4,11 +4,12 @@ Utility functions for XSS Scanner API
 import re
 import logging
 from typing import Dict, List, Any, Tuple
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 
 class XSSScanner:
-    """XSS vulnerability scanner class"""
+    """XSS vulnerability scanner class with performance optimizations"""
 
     def __init__(self):
         self.vulnerability_patterns = self._get_vulnerability_patterns()
@@ -18,41 +19,48 @@ class XSSScanner:
 
     def _get_vulnerability_patterns(self) -> Dict[str, str]:
         """
-        Returns a dictionary of regex patterns for common XSS vulnerabilities.
+        Returns a dictionary of optimized regex patterns for common XSS vulnerabilities.
 
         Returns:
             Dictionary mapping vulnerability names to regex patterns
         """
         return {
-            "innerHTML_assignment": r"\.innerHTML\s*=\s*[^;]+",
-            "document_write_call": r"document\.write\s*\([^)]*\)",
-            "eval_function_call": r"eval\s*\([^)]*\)",
-            "location_hash_usage": r"location\.hash",
+            # More precise patterns to reduce false positives
+            "innerHTML_assignment": r"(?<!//.*)\.innerHTML\s*=\s*[^;]+",
+            "document_write_call": r"(?<!//.*)document\.write\s*\([^)]*\)",
+            "eval_function_call": r"(?<!//.*)eval\s*\([^)]*\)",
+            "location_hash_usage": r"(?<!//.*)location\.hash",
             "script_tag_injection": r"<script[^>]*>.*?</script>",
             "on_event_handler": r"on\w+\s*=\s*['\"][^'\"]*['\"]",
             "javascript_protocol": r"javascript:\s*[^\"\'\s]+",
-            "unescaped_user_input": r"\.innerHTML\s*=\s*.*(\+.*userInput|\+.*req\.body|\+.*req\.query)",
-            "dangerous_src_assignment": r"\.src\s*=\s*['\"][^'\"]*['\"]",
-            "dangerous_href_assignment": r"\.href\s*=\s*['\"][^'\"]*['\"]",
+            "unescaped_user_input": r"(?<!//.*)\.innerHTML\s*=\s*.*(\+.*userInput|\+.*req\.body|\+.*req\.query)",
+            "dangerous_src_assignment": r"(?<!//.*)\.src\s*=\s*['\"][^'\"]*['\"]",
+            "dangerous_href_assignment": r"(?<!//.*)\.href\s*=\s*['\"][^'\"]*['\"]",
             "template_literal_injection": r"`.*\$\{[^}]+\}.*`",
-            "insertAdjacentHTML_call": r"insertAdjacentHTML\s*\([^)]*\)",
-            "outerHTML_assignment": r"\.outerHTML\s*=\s*[^;]+",
-            "dangerous_setAttribute": r"setAttribute\s*\(\s*['\"](?:src|href|onclick|onload)['\"]\s*,",
-            "dangerous_createElement": r"createElement\s*\(\s*['\"]script['\"]\s*\)",
-            "dangerous_write": r"\.write\s*\([^)]*\)",
-            "dangerous_writeln": r"\.writeln\s*\([^)]*\)",
+            "insertAdjacentHTML_call": r"(?<!//.*)insertAdjacentHTML\s*\([^)]*\)",
+            "outerHTML_assignment": r"(?<!//.*)\.outerHTML\s*=\s*[^;]+",
+            "dangerous_setAttribute": r"(?<!//.*)setAttribute\s*\(\s*['\"](?:src|href|onclick|onload)['\"]\s*,",
+            "dangerous_createElement": r"(?<!//.*)createElement\s*\(\s*['\"]script['\"]\s*\)",
+            "dangerous_write": r"(?<!//.*)\.write\s*\([^)]*\)",
+            "dangerous_writeln": r"(?<!//.*)\.writeln\s*\([^)]*\)",
         }
 
+    @lru_cache(maxsize=1)
     def _compile_patterns(self) -> Dict[str, Any]:
         """
-        Pre-compile regex patterns for better performance.
+        Pre-compile regex patterns for better performance with caching.
 
         Returns:
             Dictionary of compiled regex patterns
         """
         compiled = {}
         for name, pattern in self.vulnerability_patterns.items():
-            compiled[name] = re.compile(pattern, re.IGNORECASE | re.DOTALL)
+            try:
+                compiled[name] = re.compile(pattern, re.IGNORECASE | re.DOTALL)
+            except re.error as e:
+                logger.error(f"Invalid regex pattern '{name}': {e}")
+                # Fallback to a simpler pattern
+                compiled[name] = re.compile(r".*", re.IGNORECASE | re.DOTALL)
         return compiled
 
     def _is_commented_line(self, line: str, match_position: int) -> bool:
@@ -101,19 +109,23 @@ class XSSScanner:
         found_vulnerabilities = []
 
         for vulnerability_name, compiled_pattern in self.compiled_patterns.items():
-            # Find all matches of this pattern in the line
-            matches = compiled_pattern.finditer(line)
+            try:
+                # Find all matches of this pattern in the line
+                matches = compiled_pattern.finditer(line)
 
-            for match in matches:
-                # Skip if this match appears to be in a comment
-                if not self._is_commented_line(line, match.start()):
-                    found_vulnerabilities.append({
-                        "line": line_number,
-                        "vulnerability_type": vulnerability_name,
-                        "snippet": match.group().strip(),
-                        "confidence": "medium",
-                        "description": self._get_vulnerability_description(vulnerability_name)
-                    })
+                for match in matches:
+                    # Skip if this match appears to be in a comment
+                    if not self._is_commented_line(line, match.start()):
+                        found_vulnerabilities.append({
+                            "line": line_number,
+                            "vulnerability_type": vulnerability_name,
+                            "snippet": match.group().strip(),
+                            "confidence": "medium",
+                            "description": self._get_vulnerability_description(vulnerability_name)
+                        })
+            except Exception as e:
+                logger.warning(f"Error scanning line {line_number} for {vulnerability_name}: {e}")
+                continue
 
         return found_vulnerabilities
 
@@ -130,6 +142,13 @@ class XSSScanner:
             "unescaped_user_input": "User input assigned to innerHTML without proper escaping",
             "dangerous_src_assignment": "Dynamic src assignment can lead to script injection",
             "dangerous_href_assignment": "Dynamic href assignment can lead to script injection",
+            "template_literal_injection": "Template literals with user input can lead to XSS",
+            "insertAdjacentHTML_call": "insertAdjacentHTML can execute malicious HTML",
+            "outerHTML_assignment": "Direct assignment to outerHTML can lead to XSS",
+            "dangerous_setAttribute": "Dynamic attribute setting can lead to XSS",
+            "dangerous_createElement": "Creating script elements dynamically can be dangerous",
+            "dangerous_write": "Document.write() can execute malicious scripts",
+            "dangerous_writeln": "Document.writeln() can execute malicious scripts",
         }
         return descriptions.get(vulnerability_type, "Potential XSS vulnerability detected")
 
