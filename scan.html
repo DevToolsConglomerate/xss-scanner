@@ -157,64 +157,77 @@
     </div>
     <nav class="navbar p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-white">XSS Scanner</h1>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-300" id="welcome-user">Welcome, User</span>
-                <button onclick="logout()" class="text-blue-400 hover:text-blue-300">Logout</button>
+            <h1 class="text-xl sm:text-2xl font-bold text-white">XSS Scanner</h1>
+            <div class="hidden sm:flex items-center space-x-4">
+                <span class="text-gray-300 text-sm sm:text-base" id="welcome-user">Welcome, User</span>
+                <button onclick="logout()" class="text-blue-400 hover:text-blue-300 px-3 py-2 rounded-md min-w-[44px] min-h-[44px] flex items-center justify-center text-sm font-medium">Logout</button>
+            </div>
+            <div class="sm:hidden flex items-center">
+                <button id="mobile-nav-btn" class="text-white hover:text-blue-300 p-3 rounded-md min-w-[48px] min-h-[48px] flex items-center justify-center" aria-label="Toggle mobile navigation">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-nav-menu" class="hidden sm:hidden bg-gray-800 mt-2 rounded-lg p-4">
+            <div class="flex flex-col space-y-3">
+                <span class="text-gray-300 text-base font-medium" id="mobile-welcome-user">Welcome, User</span>
+                <button onclick="logout()" class="text-blue-400 hover:text-blue-300 px-4 py-3 rounded-md min-w-[48px] min-h-[48px] flex items-center justify-center text-left bg-gray-700 hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-sign-out-alt mr-3"></i>Logout
+                </button>
             </div>
         </div>
     </nav>
 
-    <div class="container mx-auto p-8">
-        <div class="scanner-card p-8 max-w-4xl mx-auto">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Advanced XSS Vulnerability Scanner</h2>
-            <p class="text-gray-300 mb-8 text-center">Scan code snippets or entire websites for XSS vulnerabilities</p>
+    <div class="container mx-auto p-4 sm:p-8">
+        <div class="scanner-card p-6 sm:p-8 max-w-4xl mx-auto">
+            <h2 class="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 text-center">Advanced XSS Vulnerability Scanner</h2>
+            <p class="text-gray-300 mb-6 sm:mb-8 text-center text-sm sm:text-base">Scan code snippets or entire websites for XSS vulnerabilities</p>
 
             <!-- Tab Navigation -->
-            <div class="flex mb-6 border-b border-gray-600">
-                <button class="tab-button active" onclick="switchTab('code')">Code Scanner</button>
-                <button class="tab-button" onclick="switchTab('website')">Website Scanner</button>
+            <div class="flex mb-6 border-b border-gray-600 overflow-x-auto">
+                <button class="tab-button active flex-shrink-0 min-w-[120px] sm:min-w-0" onclick="switchTab('code')">Code Scanner</button>
+                <button class="tab-button flex-shrink-0 min-w-[120px] sm:min-w-0" onclick="switchTab('website')">Website Scanner</button>
             </div>
 
             <!-- Code Scanner Tab -->
             <div id="code-tab" class="tab-content active">
                 <div class="mb-6">
-                    <label for="code-input" class="block text-white font-semibold mb-2">Code to Scan:</label>
-                    <textarea id="code-input" class="input-area w-full p-4 text-sm" rows="12" placeholder="Paste your HTML/JavaScript code here..."></textarea>
+                    <label for="code-input" class="block text-white font-semibold mb-2 text-sm sm:text-base">Code to Scan:</label>
+                    <textarea id="code-input" class="input-area w-full p-3 sm:p-4 text-xs sm:text-sm min-h-[120px] sm:min-h-[200px]" rows="8" placeholder="Paste your HTML/JavaScript code here..."></textarea>
                 </div>
             </div>
 
             <!-- Website Scanner Tab -->
             <div id="website-tab" class="tab-content">
                 <div class="mb-6">
-                    <label for="url-input" class="block text-white font-semibold mb-2">Website URL:</label>
-                    <div class="flex gap-2">
-                        <input type="url" id="url-input" class="url-input flex-1" placeholder="https://example.com" />
-                        <button onclick="testUrl()" class="btn-scan px-4 py-2">
-                            <i class="fas fa-link mr-2"></i>Test URL
+                    <label for="url-input" class="block text-white font-semibold mb-2 text-sm sm:text-base">Website URL:</label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="url" id="url-input" class="url-input flex-1 text-sm sm:text-base" placeholder="https://example.com" />
+                        <button onclick="testUrl()" class="btn-scan px-4 py-3 sm:px-4 sm:py-2 min-w-[48px] min-h-[48px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-sm font-medium">
+                            <i class="fas fa-link mr-2"></i><span class="hidden sm:inline">Test URL</span><span class="sm:hidden">Test</span>
                         </button>
                     </div>
-                    <p class="text-gray-400 text-sm mt-2">Enter a complete URL including https:// or http://</p>
+                    <p class="text-gray-400 text-xs sm:text-sm mt-2">Enter a complete URL including https:// or http://</p>
                 </div>
-                <div id="url-status" class="mb-4" style="display: none;"></div>
+                <div id="url-status" class="mb-4 p-3 rounded text-sm" style="display: none;"></div>
             </div>
 
             <!-- Scan Controls -->
             <div class="text-center mb-6">
-                <button onclick="scanCode()" class="btn-scan px-8 py-3 text-lg" id="scan-btn">
+                <button onclick="scanCode()" class="btn-scan px-6 sm:px-8 py-4 sm:py-3 text-base sm:text-lg min-w-[200px] sm:min-w-0 min-h-[56px] sm:min-h-0 font-semibold" id="scan-btn">
                     <i class="fas fa-search mr-2"></i>Scan for XSS
                 </button>
                 <div id="progress-container" class="mt-4" style="display: none;">
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill"></div>
                     </div>
-                    <p class="text-gray-400 text-sm mt-2" id="progress-text">Scanning...</p>
+                    <p class="text-gray-400 text-xs sm:text-sm mt-2" id="progress-text">Scanning...</p>
                 </div>
             </div>
 
-            <div id="results-section" class="results-area p-4" style="display: none;">
-                <h3 class="text-xl font-bold text-white mb-4">Scan Results:</h3>
-                <div id="results-content"></div>
+            <div id="results-section" class="results-area p-3 sm:p-4" style="display: none;">
+                <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Scan Results:</h3>
+                <div id="results-content" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -554,6 +567,23 @@
             this.style.height = 'auto';
             this.style.height = this.scrollHeight + 'px';
         });
+
+        // Mobile navigation toggle
+        const mobileNavBtn = document.getElementById('mobile-nav-btn');
+        const mobileNavMenu = document.getElementById('mobile-nav-menu');
+        const mobileWelcomeUser = document.getElementById('mobile-welcome-user');
+
+        if (mobileNavBtn && mobileNavMenu) {
+            mobileNavBtn.addEventListener('click', () => {
+                mobileNavMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Sync welcome message with mobile version
+        if (storedName && mobileWelcomeUser) {
+            const firstName = storedName.split(' ')[0];
+            mobileWelcomeUser.textContent = `Welcome, ${firstName}`;
+        }
     </script>
 </body>
 </html>
